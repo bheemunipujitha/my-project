@@ -1,0 +1,141 @@
+/* ═══════════════════════════════════════════════════
+   predict.css — Prediction Form Styles
+═══════════════════════════════════════════════════ */
+
+/* ── Form Progress Sidebar ──────────────────────── */
+.form-progress-sidebar {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-title {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-muted); margin-bottom: 16px;
+}
+.progress-steps { display: flex; flex-direction: column; gap: 4px; }
+.progress-step {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+}
+.progress-step:hover { background: rgba(15,76,129,.06); }
+.progress-step.active { background: rgba(15,76,129,.1); }
+.progress-step.completed .step-indicator { background: var(--success); }
+.step-indicator {
+  width: 32px; height: 32px;
+  background: var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--text-muted);
+  flex-shrink: 0; transition: var(--transition);
+  position: relative;
+}
+.progress-step.active .step-indicator {
+  background: var(--primary); color: #fff;
+  box-shadow: 0 4px 12px rgba(15,76,129,.35);
+}
+.step-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.progress-step.completed .step-num { display: none; }
+.step-label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.progress-step.active .step-label { color: var(--primary); font-weight: 600; }
+.progress-step.completed .step-label { color: var(--success); }
+.sidebar-tips {
+  background: rgba(245,127,23,.08);
+  border: 1px solid rgba(245,127,23,.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 12px;
+}
+
+/* ── Form Sections ──────────────────────────────── */
+.form-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.form-section:hover { box-shadow: var(--shadow-md); }
+.form-section-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 24px;
+  background: rgba(15,76,129,.03);
+  border-bottom: 1px solid var(--border);
+}
+.section-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.section-name { font-size: 16px; font-weight: 700; }
+.form-section-body { padding: 24px; }
+
+/* ── Credit Score Bar ───────────────────────────── */
+.credit-score-bar { padding: 4px 0; }
+.score-track {
+  width: 100%; height: 8px;
+  background: linear-gradient(90deg, #D32F2F 0%, #F57F17 33%, #0277BD 66%, #2E7D32 100%);
+  border-radius: 4px;
+  position: relative; margin-bottom: 4px;
+}
+.score-fill { display: none; }
+.score-thumb {
+  position: absolute; top: 50%;
+  width: 16px; height: 16px;
+  background: #fff;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  transition: left .3s ease;
+  left: 0%;
+}
+.score-labels { font-size: 10px; font-weight: 600; margin-top: 4px; }
+
+/* ── Default Toggle ─────────────────────────────── */
+.default-toggle-group { display: flex; gap: 8px; }
+.toggle-option {
+  flex: 1; padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 12px; font-weight: 600;
+  text-align: center; transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.toggle-no.active  { border-color: var(--success); background: rgba(46,125,50,.08); color: var(--success); }
+.toggle-yes.active { border-color: var(--danger);  background: rgba(211,47,47,.08); color: var(--danger); }
+.toggle-option:hover { opacity: .8; }
+
+/* ── Submit Area ────────────────────────────────── */
+.form-submit-area { padding: 8px 0 24px; }
+.btn-submit-predict {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border: none;
+  font-size: 16px; font-weight: 700;
+  padding: 14px 48px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 20px rgba(15,76,129,.35);
+  transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.btn-submit-predict::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  opacity: 0; transition: opacity .3s;
+}
+.btn-submit-predict:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(15,76,129,.45); color: #fff; }
+.btn-submit-predict:hover::before { opacity: 1; }
+.btn-submit-predict:active { transform: translateY(0); }
+
+/* ── Validation states ──────────────────────────── */
+.input-group-custom.is-invalid { border-color: var(--danger) !important; }
+.input-group-custom.is-valid   { border-color: var(--success) !important; }

@@ -1,0 +1,136 @@
+<footer class="site-footer mt-auto">
+  <div class="footer-top">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- Brand Column -->
+        <div class="col-lg-4">
+          <div class="footer-brand">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="brand-icon-sm">
+                <i class="bi bi-credit-card-2-front-fill"></i>
+              </div>
+              <div>
+                <div class="fw-700 text-white">CreditPredict AI</div>
+                <div class="footer-sub-text">IBM Watson ML</div>
+              </div>
+            </div>
+            <p class="footer-desc">
+              Predict credit card approval eligibility using state-of-the-art Machine Learning algorithms 
+              and IBM Watson Cloud — a final-year AI/ML project.
+            </p>
+            <div class="footer-stats d-flex gap-3 mt-3">
+              <div class="footer-stat">
+                <span class="stat-val">{{ total_predictions }}</span>
+                <span class="stat-lbl">Predictions</span>
+              </div>
+              <div class="footer-stat">
+                <span class="stat-val">{{ approval_rate }}%</span>
+                <span class="stat-lbl">Approval Rate</span>
+              </div>
+              <div class="footer-stat">
+                <span class="stat-val">89.1%</span>
+                <span class="stat-lbl">Accuracy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="footer-heading">Quick Links</h6>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('main.index') }}"><i class="bi bi-chevron-right"></i>Home</a></li>
+            <li><a href="{{ url_for('predict.form') }}"><i class="bi bi-chevron-right"></i>Predict Now</a></li>
+            <li><a href="{{ url_for('dashboard.analytics') }}"><i class="bi bi-chevron-right"></i>Dashboard</a></li>
+            <li><a href="{{ url_for('history.index') }}"><i class="bi bi-chevron-right"></i>History</a></li>
+            <li><a href="{{ url_for('ml_info.index') }}"><i class="bi bi-chevron-right"></i>ML Models</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="footer-heading">Resources</h6>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('main.about') }}"><i class="bi bi-chevron-right"></i>About Project</a></li>
+            <li><a href="{{ url_for('main.contact') }}"><i class="bi bi-chevron-right"></i>Contact</a></li>
+            <li><a href="{{ url_for('api.docs') }}"><i class="bi bi-chevron-right"></i>API Docs</a></li>
+            <li><a href="{{ url_for('admin.login') }}"><i class="bi bi-chevron-right"></i>Admin Panel</a></li>
+            <li><a href="https://github.com" target="_blank" rel="noopener"><i class="bi bi-chevron-right"></i>GitHub</a></li>
+          </ul>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="col-lg-4 col-md-4">
+          <h6 class="footer-heading">Powered By</h6>
+          <div class="tech-badges">
+            <span class="tech-badge"><i class="bi bi-cloud-fill"></i>IBM Watson ML</span>
+            <span class="tech-badge"><i class="bi bi-code-slash"></i>Flask 3.0</span>
+            <span class="tech-badge"><i class="bi bi-cpu-fill"></i>Scikit-Learn</span>
+            <span class="tech-badge"><i class="bi bi-lightning-fill"></i>XGBoost</span>
+            <span class="tech-badge"><i class="bi bi-bootstrap-fill"></i>Bootstrap 5</span>
+            <span class="tech-badge"><i class="bi bi-database-fill"></i>SQLite</span>
+            <span class="tech-badge"><i class="bi bi-filetype-py"></i>Python 3.11</span>
+            <span class="tech-badge"><i class="bi bi-bar-chart-fill"></i>Chart.js</span>
+          </div>
+
+          <!-- IBM Watson Logo Area -->
+          <div class="ibm-badge mt-3">
+            <i class="bi bi-cloud-check-fill me-2"></i>
+            <span>Integrated with <strong>IBM Watson</strong> Machine Learning</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Bottom -->
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <p class="mb-0">
+            &copy; {{ now().year if now is defined else '2024' }} 
+            <strong>CreditPredict AI</strong> — Final Year AI/ML Project.
+            Built with <i class="bi bi-heart-fill text-danger mx-1"></i> using IBM Watson &amp; Flask.
+          </p>
+        </div>
+        <div class="col-md-3 text-md-center">
+          <div class="footer-legal-links">
+            <a href="#">Privacy Policy</a>
+            <span class="mx-2">·</span>
+            <a href="#">Terms of Use</a>
+          </div>
+        </div>
+        <div class="col-md-3 text-md-end mt-2 mt-md-0">
+          <div class="footer-social">
+            <a href="https://linkedin.com" target="_blank" rel="noopener"
+               class="social-btn" data-bs-toggle="tooltip" title="LinkedIn">
+              <i class="bi bi-linkedin"></i>
+            </a>
+            <a href="https://github.com" target="_blank" rel="noopener"
+               class="social-btn" data-bs-toggle="tooltip" title="GitHub">
+              <i class="bi bi-github"></i>
+            </a>
+            <a href="mailto:your.email@example.com"
+               class="social-btn" data-bs-toggle="tooltip" title="Email">
+              <i class="bi bi-envelope-fill"></i>
+            </a>
+            <a href="{{ url_for('api.docs') }}"
+               class="social-btn" data-bs-toggle="tooltip" title="API Docs">
+              <i class="bi bi-code-slash"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // inject current year without Jinja filter dependency
+  document.querySelectorAll('.footer-year').forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+</script>

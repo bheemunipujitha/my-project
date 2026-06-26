@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════
+     HERO SECTION
+══════════════════════════════════════ -->
+<section class="hero-section" id="hero">
+  <div class="hero-bg-shapes">
+    <div class="hero-shape shape-1"></div>
+    <div class="hero-shape shape-2"></div>
+    <div class="hero-shape shape-3"></div>
+  </div>
+  <div class="container">
+    <div class="row align-items-center min-vh-85 py-5">
+
+      <!-- Text Content -->
+      <div class="col-lg-6 hero-content" data-aos="fade-right">
+        <div class="hero-eyebrow">
+          <i class="bi bi-cloud-check-fill me-2"></i>IBM Watson Machine Learning
+        </div>
+        <h1 class="hero-title">
+          <span class="typing-text" id="typingTitle"></span>
+          <span class="typing-cursor">|</span>
+        </h1>
+        <p class="hero-subtitle">
+          Predict customer credit card approval eligibility using advanced Machine Learning algorithms 
+          deployed on IBM Watson Cloud. Get instant results with risk analysis, confidence scores, 
+          and actionable recommendations.
+        </p>
+        <div class="hero-actions d-flex flex-wrap gap-3 mt-4">
+          <a href="{{ url_for('predict.form') }}" class="btn btn-hero-primary">
+            <i class="bi bi-lightning-charge-fill me-2"></i>Predict Now
+          </a>
+          <a href="{{ url_for('main.about') }}" class="btn btn-hero-outline">
+            <i class="bi bi-play-circle-fill me-2"></i>Learn More
+          </a>
+        </div>
+        <!-- Trust Badges -->
+        <div class="hero-trust mt-4 d-flex flex-wrap gap-3">
+          <div class="trust-item"><i class="bi bi-shield-check-fill text-success me-1"></i>Secure Processing</div>
+          <div class="trust-item"><i class="bi bi-lightning-fill text-warning me-1"></i>Real-time Results</div>
+          <div class="trust-item"><i class="bi bi-cpu-fill text-info me-1"></i>AI-Powered</div>
+        </div>
+      </div>
+
+      <!-- Hero Illustration -->
+      <div class="col-lg-6 text-center mt-5 mt-lg-0" data-aos="fade-left">
+        <div class="hero-illustration">
+          <div class="hero-card-stack">
+            <!-- Main Credit Card -->
+            <div class="credit-card-visual main-card">
+              <div class="card-chip"><i class="bi bi-cpu-fill"></i></div>
+              <div class="card-number">**** **** **** 4821</div>
+              <div class="card-details">
+                <div>
+                  <div class="card-label">CARD HOLDER</div>
+                  <div class="card-value">RAHUL SHARMA</div>
+                </div>
+                <div>
+                  <div class="card-label">EXPIRES</div>
+                  <div class="card-value">12/28</div>
+                </div>
+                <div class="card-network"><i class="bi bi-credit-card-2-front-fill fs-2"></i></div>
+              </div>
+            </div>
+            <!-- Behind Card -->
+            <div class="credit-card-visual back-card">
+              <div class="card-number">**** **** **** 9364</div>
+            </div>
+          </div>
+
+          <!-- Floating badges -->
+          <div class="float-badge badge-approved">
+            <i class="bi bi-check-circle-fill me-1"></i>Approved
+          </div>
+          <div class="float-badge badge-score">
+            <i class="bi bi-graph-up me-1"></i>Score: 742
+          </div>
+          <div class="float-badge badge-ai">
+            <i class="bi bi-cpu-fill me-1"></i>AI Powered
+          </div>
+
+          <!-- Orbiting ring -->
+          <div class="orbit-ring"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     STATISTICS CARDS
+══════════════════════════════════════ -->
+<section class="stats-section py-4">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="row g-0">
+        <div class="col-6 col-md-3">
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="0">
+            <div class="stat-icon bg-primary-soft"><i class="bi bi-collection-fill text-primary"></i></div>
+            <div class="stat-info">
+              <div class="stat-number counter" data-target="{{ total_predictions }}">0</div>
+              <div class="stat-label">Applications Processed</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card border-start" data-aos="zoom-in" data-aos-delay="100">
+            <div class="stat-icon bg-success-soft"><i class="bi bi-graph-up-arrow text-success"></i></div>
+            <div class="stat-info">
+              <div class="stat-number">{{ model_accuracy }}%</div>
+              <div class="stat-label">Model Accuracy</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card border-start" data-aos="zoom-in" data-aos-delay="200">
+            <div class="stat-icon bg-info-soft"><i class="bi bi-check-circle-fill text-info"></i></div>
+            <div class="stat-info">
+              <div class="stat-number counter" data-target="{{ approved_count }}">0</div>
+              <div class="stat-label">Approved Applications</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+            <div class="stat-icon bg-danger-soft"><i class="bi bi-x-circle-fill text-danger"></i></div>
+            <div class="stat-info">
+              <div class="stat-number counter" data-target="{{ rejected_count }}">0</div>
+              <div class="stat-label">Rejected Applications</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FEATURES SECTION
+══════════════════════════════════════ -->
+<section class="features-section section-padding bg-light-custom">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <span class="section-eyebrow">What We Offer</span>
+      <h2 class="section-title">Enterprise-Grade Credit Intelligence</h2>
+      <p class="section-subtitle">Powered by IBM Watson Machine Learning with multiple ML algorithms</p>
+    </div>
+    <div class="row g-4">
+      {% set features = [
+        ('bi-lightning-charge-fill','primary','Real-time Prediction','Get instant credit approval predictions with confidence scores, risk analysis, and personalised recommendations.'),
+        ('bi-bar-chart-line-fill','success','Analytics Dashboard','Visualise trends, approval rates, income distributions, and credit score patterns through interactive charts.'),
+        ('bi-shield-check-fill','info','Risk Assessment','Detailed risk factor analysis identifying strengths and weaknesses in each credit application.'),
+        ('bi-cloud-check-fill','warning','IBM Watson Cloud','Seamlessly integrated with IBM Watson Machine Learning for scalable, production-grade model deployment.'),
+        ('bi-file-earmark-pdf-fill','danger','PDF Reports','Download professional PDF reports for each prediction including full financial summary and recommendations.'),
+        ('bi-code-slash','secondary','REST API','Full-featured REST API with Swagger documentation for integration into any third-party banking application.'),
+      ] %}
+      {% for icon, color, title, desc in features %}
+      <div class="col-md-6 col-lg-4" data-aos="fade-up">
+        <div class="feature-card h-100">
+          <div class="feature-icon bg-{{ color }}-soft">
+            <i class="bi {{ icon }} text-{{ color }}"></i>
+          </div>
+          <h5 class="feature-title">{{ title }}</h5>
+          <p class="feature-desc">{{ desc }}</p>
+          <div class="feature-arrow"><i class="bi bi-arrow-right-circle-fill text-{{ color }}"></i></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════ -->
+<section class="how-section section-padding">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <span class="section-eyebrow">Process</span>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Four simple steps from application to decision</p>
+    </div>
+    <div class="row g-4 align-items-center">
+      {% set steps = [
+        ('bi-form','primary','Submit Application','Fill in personal, financial, employment, and loan details in our structured form.'),
+        ('bi-cpu-fill','success','AI Analysis','IBM Watson ML analyses your profile against trained models using 16+ credit features.'),
+        ('bi-graph-up-arrow','info','Risk Scoring','System calculates approval probability, risk score, credit rating, and key factors.'),
+        ('bi-file-check-fill','warning','Get Decision','Receive instant result with PDF report, recommendation, and actionable guidance.'),
+      ] %}
+      {% for icon, color, title, desc in steps %}
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+        <div class="step-card text-center">
+          <div class="step-number">{{ loop.index }}</div>
+          <div class="step-icon bg-{{ color }}-soft mx-auto">
+            <i class="bi {{ icon }} text-{{ color }}"></i>
+          </div>
+          <h6 class="step-title">{{ title }}</h6>
+          <p class="step-desc">{{ desc }}</p>
+        </div>
+        {% if not loop.last %}<div class="step-arrow d-none d-lg-block"></div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     ML MODELS PREVIEW
+══════════════════════════════════════ -->
+<section class="models-section section-padding bg-primary-gradient">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-5 text-white mb-4 mb-lg-0">
+        <span class="section-eyebrow-light">Machine Learning</span>
+        <h2 class="section-title text-white">4 Powerful Algorithms</h2>
+        <p class="text-white-75">
+          We train and compare four industry-standard classifiers, selecting the best performer 
+          for deployment on IBM Watson Cloud.
+        </p>
+        <a href="{{ url_for('ml_info.index') }}" class="btn btn-outline-light mt-2">
+          <i class="bi bi-cpu-fill me-2"></i>Explore ML Models
+        </a>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-3">
+          {% set models = [
+            ('XGBoost','89.1%','bi-lightning-fill','Gradient boosting ensemble — primary production model'),
+            ('Random Forest','87.3%','bi-diagram-3-fill','Bagged tree ensemble with feature importance'),
+            ('Logistic Regression','83.2%','bi-graph-up','Linear baseline with probabilistic output'),
+            ('Decision Tree','81.5%','bi-share-fill','Interpretable rule-based classifier'),
+          ] %}
+          {% for name, acc, icon, desc in models %}
+          <div class="col-sm-6" data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 80 }}">
+            <div class="model-preview-card">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <i class="bi {{ icon }} fs-4 text-primary mb-2 d-block"></i>
+                  <h6 class="fw-700 mb-1">{{ name }}</h6>
+                  <small class="text-muted">{{ desc }}</small>
+                </div>
+                <div class="accuracy-badge">{{ acc }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CTA BANNER
+══════════════════════════════════════ -->
+<section class="cta-section section-padding">
+  <div class="container">
+    <div class="cta-card text-center" data-aos="zoom-in">
+      <div class="cta-icon"><i class="bi bi-credit-card-2-front-fill"></i></div>
+      <h2 class="cta-title">Ready to Check Your Eligibility?</h2>
+      <p class="cta-subtitle">Get your credit card approval prediction in under 60 seconds.</p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+        <a href="{{ url_for('predict.form') }}" class="btn btn-cta-primary">
+          <i class="bi bi-lightning-charge-fill me-2"></i>Start Prediction
+        </a>
+        <a href="{{ url_for('dashboard.analytics') }}" class="btn btn-cta-outline">
+          <i class="bi bi-bar-chart-line-fill me-2"></i>View Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+  // Typing animation text
+  const typingTexts = ['Credit Card', 'Approval', 'Prediction'];
+  let ti = 0, ci = 0, del = false;
+  const el = document.getElementById('typingTitle');
+
+  function type() {
+    if (!el) return;
+    const word = typingTexts[ti];
+    if (!del) {
+      el.textContent = word.slice(0, ++ci);
+      if (ci === word.length) { del = true; setTimeout(type, 1800); return; }
+    } else {
+      el.textContent = word.slice(0, --ci);
+      if (ci === 0) { del = false; ti = (ti + 1) % typingTexts.length; }
+    }
+    setTimeout(type, del ? 60 : 90);
+  }
+  setTimeout(type, 500);
+</script>
+{% endblock %}

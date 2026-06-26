@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="about-page">
+  <div class="page-header-section">
+    <div class="container">
+      <nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-custom mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item active">About</li>
+      </ol></nav>
+      <h1 class="page-title"><i class="bi bi-info-circle-fill me-2 text-info"></i>About This Project</h1>
+      <p class="page-subtitle">Credit Card Approval Prediction using IBM Watson Machine Learning</p>
+    </div>
+  </div>
+
+  <div class="container py-5">
+
+    <!-- Project Overview -->
+    <div class="row g-4 mb-5 align-items-center">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">Final Year AI/ML Project</span>
+        <h2 class="section-title">Project Overview</h2>
+        <p>This project predicts whether a credit card application will be approved or rejected using multiple machine learning algorithms. The best-performing model (XGBoost) is deployed on <strong>IBM Watson Machine Learning</strong> for real-time inference.</p>
+        <p>The system implements a complete end-to-end ML pipeline — from data preprocessing and model training to cloud deployment and a production-grade web interface built with Flask and Bootstrap 5.</p>
+        <a href="https://github.com" target="_blank" class="btn btn-primary mt-2">
+          <i class="bi bi-github me-2"></i>View on GitHub
+        </a>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          {% for icon, color, label, desc in [
+            ('bi-bullseye','primary','Objective','Predict credit card approval using ML with high accuracy'),
+            ('bi-cloud-check-fill','info','Platform','IBM Watson ML Cloud deployment for scalable inference'),
+            ('bi-shield-check-fill','success','Accuracy','89.1% test accuracy with XGBoost classifier'),
+            ('bi-database-fill','warning','Dataset','5,000 synthetic records modelled on real credit data'),
+          ] %}
+          <div class="col-6">
+            <div class="about-card">
+              <i class="bi {{ icon }} text-{{ color }} fs-3 mb-2 d-block"></i>
+              <h6 class="fw-700">{{ label }}</h6>
+              <p class="small text-muted mb-0">{{ desc }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Workflow -->
+    <div class="section-header text-center mb-4">
+      <h2 class="section-title">System Workflow</h2>
+    </div>
+    <div class="workflow-timeline mb-5">
+      {% for step, desc, icon in [
+        ('Data Collection','UCI Credit dataset with 16 financial and demographic features','bi-database-fill'),
+        ('Preprocessing','Label encoding, standard scaling, train/test split (80/20)','bi-funnel-fill'),
+        ('Model Training','Train Random Forest, XGBoost, Logistic Regression, Decision Tree','bi-cpu-fill'),
+        ('Evaluation','Compare Accuracy, Precision, Recall, F1, AUC-ROC across models','bi-graph-up-arrow'),
+        ('Deployment','Deploy best model (XGBoost) to IBM Watson ML online endpoint','bi-cloud-upload-fill'),
+        ('Inference','Web app sends features to Watson → receives prediction → displays result','bi-lightning-fill'),
+      ] %}
+      <div class="workflow-step">
+        <div class="workflow-icon"><i class="bi {{ icon }}"></i></div>
+        <div class="workflow-content">
+          <h6 class="fw-700">{{ loop.index }}. {{ step }}</h6>
+          <p class="text-muted small mb-0">{{ desc }}</p>
+        </div>
+        {% if not loop.last %}<div class="workflow-arrow"><i class="bi bi-arrow-down"></i></div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="section-header text-center mb-4">
+      <h2 class="section-title">Technology Stack</h2>
+    </div>
+    <div class="row g-3 mb-5">
+      {% for tech, icon, color, desc in [
+        ('IBM Watson ML','bi-cloud-fill','primary','Cloud ML deployment & real-time inference endpoint'),
+        ('Flask 3.0','bi-code-slash','dark','Python web framework with Blueprints and SQLAlchemy'),
+        ('Python 3.11','bi-filetype-py','warning','Core language for ML pipeline and backend logic'),
+        ('Scikit-Learn','bi-cpu-fill','danger','Model training, evaluation, and preprocessing'),
+        ('XGBoost','bi-lightning-fill','success','Primary gradient boosting model — 89.1% accuracy'),
+        ('SQLite','bi-database-fill','info','Local database for prediction history storage'),
+        ('Bootstrap 5','bi-bootstrap-fill','purple','Responsive UI components and layout grid'),
+        ('Chart.js','bi-bar-chart-fill','orange','Interactive charts for analytics dashboard'),
+      ] %}
+      <div class="col-6 col-md-3">
+        <div class="tech-card">
+          <i class="bi {{ icon }} fs-2 text-{{ color }} mb-2 d-block"></i>
+          <h6 class="fw-700 mb-1">{{ tech }}</h6>
+          <p class="small text-muted mb-0">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Developer -->
+    <div class="developer-card text-center py-5">
+      <div class="dev-avatar"><i class="bi bi-person-circle"></i></div>
+      <h4 class="mt-3 fw-700">Your Name</h4>
+      <p class="text-muted">Final Year B.Tech · Artificial Intelligence & Machine Learning</p>
+      <p class="text-muted small max-w-600 mx-auto">
+        Passionate about applying machine learning to solve real-world financial problems. 
+        This project demonstrates proficiency in ML model deployment, cloud integration, and full-stack web development.
+      </p>
+      <div class="dev-links mt-3 d-flex justify-content-center gap-3">
+        <a href="https://linkedin.com" target="_blank" class="btn btn-outline-primary">
+          <i class="bi bi-linkedin me-1"></i>LinkedIn
+        </a>
+        <a href="https://github.com" target="_blank" class="btn btn-outline-dark">
+          <i class="bi bi-github me-1"></i>GitHub
+        </a>
+        <a href="mailto:your@email.com" class="btn btn-outline-info">
+          <i class="bi bi-envelope-fill me-1"></i>Email
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

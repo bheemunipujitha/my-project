@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+{% block title %}Predict Approval{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/predict.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="predict-page">
+  <!-- Page Header -->
+  <div class="page-header-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom mb-2">
+              <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+              <li class="breadcrumb-item active">Predict</li>
+            </ol>
+          </nav>
+          <h1 class="page-title"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Credit Approval Prediction</h1>
+          <p class="page-subtitle">Fill in the applicant details below to get an AI-powered credit decision.</p>
+        </div>
+        <div class="col-auto d-none d-md-block">
+          <div class="watson-indicator">
+            <i class="bi bi-cloud-check-fill me-2"></i>IBM Watson ML Ready
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row g-4">
+
+      <!-- LEFT: Progress Sidebar -->
+      <div class="col-lg-3">
+        <div class="form-progress-sidebar sticky-top" style="top: 90px;">
+          <h6 class="sidebar-title">Application Progress</h6>
+          <div class="progress-steps">
+            {% set sections = [
+              ('personal-section','bi-person-fill','Personal Info'),
+              ('financial-section','bi-wallet2','Financial Details'),
+              ('credit-section','bi-graph-up','Credit History'),
+              ('employment-section','bi-briefcase-fill','Employment'),
+              ('loan-section','bi-bank','Loan Information'),
+            ] %}
+            {% for id, icon, label in sections %}
+            <div class="progress-step" data-section="{{ id }}" id="step-{{ loop.index }}">
+              <div class="step-indicator">
+                <i class="bi {{ icon }}"></i>
+                <span class="step-num">{{ loop.index }}</span>
+              </div>
+              <span class="step-label">{{ label }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="overall-progress mt-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small>Completion</small>
+              <small id="progressPct">0%</small>
+            </div>
+            <div class="progress" style="height:6px;">
+              <div class="progress-bar bg-primary" id="overallProgress" style="width:0%; transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+          <div class="sidebar-tips mt-3">
+            <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+            <small>All fields marked <span class="text-danger">*</span> are required.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Form -->
+      <div class="col-lg-9">
+        <form action="{{ url_for('predict.submit') }}" method="POST" id="predictionForm" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <!-- ── SECTION 1: Personal Information ── -->
+          <div class="form-section" id="personal-section">
+            <div class="form-section-header">
+              <div class="section-icon bg-primary-soft"><i class="bi bi-person-fill text-primary"></i></div>
+              <div>
+                <h5 class="section-name mb-0">Personal Information</h5>
+                <small class="text-muted">Basic demographic details of the applicant</small>
+              </div>
+            </div>
+            <div class="form-section-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Full Name <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Enter the applicant's full legal name as on ID."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-person-fill"></i></span>
+                      <input type="text" class="form-control-custom" name="applicant_name"
+                             placeholder="e.g. Rahul Sharma" maxlength="100" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-applicant_name"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Email Address
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Optional. Used to send the result email."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-envelope-fill"></i></span>
+                      <input type="email" class="form-control-custom" name="applicant_email"
+                             placeholder="applicant@example.com" maxlength="150">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Gender <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-gender-ambiguous"></i></span>
+                      <select class="form-control-custom form-select-custom" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-gender"></div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Age <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Must be between 18 and 75 years."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-calendar3-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="age"
+                             placeholder="e.g. 32" min="18" max="75" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-age"></div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Marital Status <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-heart-fill"></i></span>
+                      <select class="form-control-custom form-select-custom" name="marital_status" required>
+                        <option value="">Select Status</option>
+                        <option>Single</option><option>Married</option>
+                        <option>Divorced</option><option>Widowed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Number of Children <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-people-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="num_children"
+                             placeholder="0" min="0" max="10" value="0" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Education Level <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-mortarboard-fill"></i></span>
+                      <select class="form-control-custom form-select-custom" name="education" required>
+                        <option value="">Select Education</option>
+                        <option>High School</option><option>Some College</option>
+                        <option>Bachelor's</option><option>Master's</option><option>PhD</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 2: Financial Details ── -->
+          <div class="form-section" id="financial-section">
+            <div class="form-section-header">
+              <div class="section-icon bg-success-soft"><i class="bi bi-wallet2 text-success"></i></div>
+              <div>
+                <h5 class="section-name mb-0">Financial Details</h5>
+                <small class="text-muted">Income, assets, debt, and credit score information</small>
+              </div>
+            </div>
+            <div class="form-section-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Annual Income (₹) <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Gross annual income before tax deductions."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-currency-rupee"></i></span>
+                      <input type="number" class="form-control-custom" name="annual_income"
+                             placeholder="e.g. 600000" min="5000" max="10000000" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-annual_income"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Credit Score <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="CIBIL/FICO score: 300–850. Higher is better (720+ is good)."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-speedometer2"></i></span>
+                      <input type="number" class="form-control-custom" name="credit_score"
+                             placeholder="e.g. 720" min="300" max="850" required id="creditScoreInput">
+                    </div>
+                    <!-- Live credit score indicator -->
+                    <div class="credit-score-bar mt-2">
+                      <div class="score-track">
+                        <div class="score-fill" id="scoreBar"></div>
+                        <div class="score-thumb" id="scoreThumb"></div>
+                      </div>
+                      <div class="score-labels d-flex justify-content-between">
+                        <span class="text-danger">Poor</span>
+                        <span class="text-warning">Fair</span>
+                        <span class="text-info">Good</span>
+                        <span class="text-success">Excellent</span>
+                      </div>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-credit_score"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Total Assets (₹)
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Savings, property, investments, and other assets."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-building-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="total_assets"
+                             placeholder="e.g. 1500000" min="0" max="100000000">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Total Debt (₹)
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Existing loan EMIs, credit card balances, and other liabilities."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="total_debt"
+                             placeholder="e.g. 200000" min="0" max="10000000">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 3: Credit History ── -->
+          <div class="form-section" id="credit-section">
+            <div class="form-section-header">
+              <div class="section-icon bg-info-soft"><i class="bi bi-graph-up text-info"></i></div>
+              <div>
+                <h5 class="section-name mb-0">Credit History</h5>
+                <small class="text-muted">Past credit behaviour and relationship tenure</small>
+              </div>
+            </div>
+            <div class="form-section-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Months as Customer
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="How long has the applicant been a banking customer?"></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-calendar-check-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="months_customer"
+                             placeholder="e.g. 36" min="0" max="600" value="0">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Prior Loans <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon"
+                         title="Total number of previous loans taken."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-journal-text"></i></span>
+                      <input type="number" class="form-control-custom" name="prior_loans"
+                             placeholder="e.g. 2" min="0" max="50" value="0" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom d-block">Previous Default?
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Has the applicant ever defaulted on a loan?"></i>
+                    </label>
+                    <div class="default-toggle-group mt-2">
+                      <label class="toggle-option toggle-no active" id="toggleNo">
+                        <input type="radio" name="has_default" value="false" checked hidden>
+                        <i class="bi bi-check-circle-fill me-1"></i>No Default
+                      </label>
+                      <label class="toggle-option toggle-yes" id="toggleYes">
+                        <input type="radio" name="has_default" value="true" hidden>
+                        <i class="bi bi-x-circle-fill me-1"></i>Has Defaulted
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 4: Employment Details ── -->
+          <div class="form-section" id="employment-section">
+            <div class="form-section-header">
+              <div class="section-icon bg-warning-soft"><i class="bi bi-briefcase-fill text-warning"></i></div>
+              <div>
+                <h5 class="section-name mb-0">Employment Details</h5>
+                <small class="text-muted">Current employment status and tenure</small>
+              </div>
+            </div>
+            <div class="form-section-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Employment Status <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-briefcase-fill"></i></span>
+                      <select class="form-control-custom form-select-custom" name="employment_status" required>
+                        <option value="">Select Status</option>
+                        <option>Full-time</option><option>Part-time</option>
+                        <option>Self-employed</option><option>Unemployed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Years Employed
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="Total years at current or most recent employer."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-clock-fill"></i></span>
+                      <input type="number" class="form-control-custom" name="years_employed"
+                             placeholder="e.g. 5" min="0" max="50" step="0.5" value="0">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Occupation</label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-person-badge-fill"></i></span>
+                      <input type="text" class="form-control-custom" name="occupation"
+                             placeholder="e.g. Software Engineer" maxlength="50">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 5: Loan Information ── -->
+          <div class="form-section" id="loan-section">
+            <div class="form-section-header">
+              <div class="section-icon bg-danger-soft"><i class="bi bi-bank text-danger"></i></div>
+              <div>
+                <h5 class="section-name mb-0">Loan Information</h5>
+                <small class="text-muted">Details about the credit card / loan being requested</small>
+              </div>
+            </div>
+            <div class="form-section-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Loan Amount (₹) <span class="req">*</span>
+                      <i class="bi bi-question-circle-fill tooltip-icon" data-bs-toggle="tooltip"
+                         title="The credit limit or loan amount being requested."></i>
+                    </label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-currency-rupee"></i></span>
+                      <input type="number" class="form-control-custom" name="loan_amount"
+                             placeholder="e.g. 200000" min="500" max="5000000" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="err-loan_amount"></div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Loan Term (months) <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-calendar-range-fill"></i></span>
+                      <select class="form-control-custom form-select-custom" name="loan_term" required>
+                        <option value="">Select</option>
+                        <option value="6">6 months</option>
+                        <option value="12">12 months</option>
+                        <option value="24">24 months</option>
+                        <option value="36" selected>36 months</option>
+                        <option value="48">48 months</option>
+                        <option value="60">60 months</option>
+                        <option value="84">84 months</option>
+                        <option value="120">120 months</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group-custom">
+                    <label class="form-label-custom">Loan Purpose <span class="req">*</span></label>
+                    <div class="input-group-custom">
+                      <span class="input-prefix"><i class="bi bi-tag-fill"></i></span>
+                      <select class="form-control-custom form-select-custom" name="loan_purpose" required>
+                        <option value="">Select</option>
+                        <option>Personal</option><option>Home</option><option>Auto</option>
+                        <option>Education</option><option>Business</option>
+                        <option>Medical</option><option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Submit ── -->
+          <div class="form-submit-area text-center mt-4">
+            <div class="submit-info mb-3">
+              <i class="bi bi-shield-lock-fill text-success me-1"></i>
+              <small class="text-muted">Your data is processed securely and never shared.</small>
+            </div>
+            <button type="submit" class="btn btn-submit-predict" id="submitBtn">
+              <span class="submit-text">
+                <i class="bi bi-lightning-charge-fill me-2"></i>Run Credit Prediction
+              </span>
+              <span class="submit-loading d-none">
+                <span class="spinner-border spinner-border-sm me-2"></span>Analysing with IBM Watson…
+              </span>
+            </button>
+          </div>
+
+        </form>
+      </div><!-- /col-lg-9 -->
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+{% endblock %}

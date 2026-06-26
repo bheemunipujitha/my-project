@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════
+   result.css — Prediction Result Dashboard Styles
+═══════════════════════════════════════════════════ */
+
+/* ── Page Header ────────────────────────────────── */
+.result-page-header {
+  padding: 28px 0;
+}
+.header-approved {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32, #388E3C);
+}
+.header-rejected {
+  background: linear-gradient(135deg, #7F0000, #C62828, #D32F2F);
+}
+.result-header-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.result-header-sub   { color: rgba(255,255,255,.75); font-size: 13px; }
+.breadcrumb-light .breadcrumb-item,
+.breadcrumb-light .breadcrumb-item a { color: rgba(255,255,255,.65); font-size: 12px; }
+.breadcrumb-light .breadcrumb-item.active { color: rgba(255,255,255,.9); }
+.breadcrumb-light .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.4); }
+.btn-result-action {
+  font-size: 12px; font-weight: 600;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+/* ── Decision Card ──────────────────────────────── */
+.decision-card {
+  border-radius: var(--radius-xl);
+  padding: 36px 24px;
+  text-align: center;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.decision-approved {
+  background: linear-gradient(145deg, #1B5E20, #2E7D32);
+  color: #fff;
+}
+.decision-rejected {
+  background: linear-gradient(145deg, #7F0000, #C62828);
+  color: #fff;
+}
+.decision-glow {
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at center, rgba(255,255,255,.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.decision-icon-wrap { margin-bottom: 16px; }
+.decision-main-icon { font-size: 56px; }
+.decision-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.decision-subtitle { color: rgba(255,255,255,.85); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+.credit-rating-badge {
+  display: inline-block; padding: 6px 20px;
+  border-radius: 20px; font-size: 13px; font-weight: 800;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,.2);
+  border: 1.5px solid rgba(255,255,255,.35);
+  color: #fff; margin-bottom: 20px;
+}
+.decision-footer {
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.15);
+  font-size: 11px; color: rgba(255,255,255,.7);
+}
+
+/* ── Metric Cards ───────────────────────────────── */
+.metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+.metric-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.metric-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.metric-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.metric-tip  { font-size: 14px; color: var(--text-muted); cursor: help; }
+.metric-value { font-size: 26px; font-weight: 800; color: var(--primary); line-height: 1.1; margin-bottom: 4px; }
+.metric-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── Chart Cards ────────────────────────────────── */
+.chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.chart-card-header {
+  display: flex; align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.chart-body { padding: 16px; }
+.chart-legend { font-size: 12px; padding: 0 16px; }
+.gauge-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+/* ── Info Cards ─────────────────────────────────── */
+.info-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.info-card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  font-size: 13px;
+}
+.info-card-body { padding: 18px; }
+.recommendation-text { font-size: 14px; line-height: 1.7; color: var(--text); margin: 0; }
+
+/* ── Factors Cards ──────────────────────────────── */
+.factors-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.factors-positive { background: rgba(46,125,50,.05); border: 1px solid rgba(46,125,50,.2); }
+.factors-risk     { background: rgba(211,47,47,.05); border: 1px solid rgba(211,47,47,.2); }
+.factors-header {
+  display: flex; align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  font-size: 13px;
+}
+.factors-positive .factors-header { border-color: rgba(46,125,50,.2); }
+.factors-risk .factors-header     { border-color: rgba(211,47,47,.2); }
+.factors-list {
+  list-style: none; padding: 12px 16px; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.factors-list li { font-size: 13px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
+
+/* ── Financial Summary Card ─────────────────────── */
+.summary-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.summary-header {
+  display: flex; align-items: center;
+  padding: 14px 18px;
+  background: rgba(15,76,129,.04);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.summary-body { padding: 0; }
+.summary-item {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.summary-item:nth-child(4n) { border-right: none; }
+.summary-item:nth-last-child(-n+4) { border-bottom: none; }
+.summary-icon { font-size: 16px; color: var(--primary); margin-bottom: 6px; }
+.summary-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; margin-bottom: 3px; }
+.summary-value { font-size: 14px; font-weight: 700; color: var(--text); }
+
+/* ── CTA Buttons ────────────────────────────────── */
+.btn-predict-again {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; border: none;
+  font-weight: 700; padding: 12px 28px;
+  border-radius: var(--radius-md);
+  font-size: 14px; transition: var(--transition);
+}
+.btn-predict-again:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); color: #fff; }
+
+/* ── Print Styles ───────────────────────────────── */
+@media print {
+  .navbar-banking, .site-footer, .result-actions,
+  .btn-predict-again, #emailModal { display: none !important; }
+  .result-page-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .decision-card { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}

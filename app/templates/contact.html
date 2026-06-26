@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Contact{% endblock %}
+{% block content %}
+<div class="contact-page">
+  <div class="page-header-section">
+    <div class="container">
+      <h1 class="page-title"><i class="bi bi-envelope-fill me-2 text-info"></i>Contact</h1>
+      <p class="page-subtitle">Get in touch for questions, feedback, or collaboration</p>
+    </div>
+  </div>
+  <div class="container py-5">
+    <div class="row g-5 justify-content-center">
+      <div class="col-lg-5">
+        <div class="contact-info-panel">
+          <h4 class="fw-700 mb-4">Get in Touch</h4>
+          {% for icon, color, label, val in [
+            ('bi-envelope-fill','primary','Email','your.email@example.com'),
+            ('bi-linkedin','info','LinkedIn','linkedin.com/in/yourprofile'),
+            ('bi-github','dark','GitHub','github.com/yourusername'),
+            ('bi-geo-alt-fill','danger','Location','Your City, India'),
+          ] %}
+          <div class="contact-info-item">
+            <div class="contact-icon bg-{{ color }}-soft"><i class="bi {{ icon }} text-{{ color }}"></i></div>
+            <div><div class="contact-label">{{ label }}</div><div class="contact-val">{{ val }}</div></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="contact-form-card">
+          <h4 class="fw-700 mb-4">Send a Message</h4>
+          <form method="POST" action="{{ url_for('main.contact') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Full Name <span class="req">*</span></label>
+                  <div class="input-group-custom">
+                    <span class="input-prefix"><i class="bi bi-person-fill"></i></span>
+                    <input type="text" class="form-control-custom" name="name" placeholder="Your name" required>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Email <span class="req">*</span></label>
+                  <div class="input-group-custom">
+                    <span class="input-prefix"><i class="bi bi-envelope-fill"></i></span>
+                    <input type="email" class="form-control-custom" name="email" placeholder="your@email.com" required>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Subject</label>
+                  <div class="input-group-custom">
+                    <span class="input-prefix"><i class="bi bi-chat-text-fill"></i></span>
+                    <input type="text" class="form-control-custom" name="subject" placeholder="What's this about?">
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Message <span class="req">*</span></label>
+                  <textarea class="form-control-custom" name="message" rows="5"
+                            placeholder="Type your message here…" required style="resize:vertical;"></textarea>
+                </div>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-send-fill me-2"></i>Send Message
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

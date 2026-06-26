@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+  <!-- Page Header -->
+  <div class="page-header-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col">
+          <nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-custom mb-2">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Dashboard</li>
+          </ol></nav>
+          <h1 class="page-title"><i class="bi bi-bar-chart-line-fill me-2 text-primary"></i>Analytics Dashboard</h1>
+          <p class="page-subtitle">Live KPIs, trends, and credit prediction analytics</p>
+        </div>
+        <div class="col-auto d-flex gap-2">
+          <a href="{{ url_for('history.export_csv') }}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-download me-1"></i>Export CSV
+          </a>
+          <button class="btn btn-sm btn-primary" id="refreshCharts">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid px-4 py-4">
+
+    <!-- ── KPI Cards ── -->
+    <div class="row g-3 mb-4">
+      {% set kpis = [
+        ('Total Predictions', stats.total, 'bi-collection-fill', 'primary', '+' ~ stats.today ~ ' today'),
+        ('Approved', stats.approved, 'bi-check-circle-fill', 'success', stats.approval_rate ~ '% approval rate'),
+        ('Rejected', stats.rejected, 'bi-x-circle-fill', 'danger', stats.rejection_rate ~ '% rejection rate'),
+        ("Today's Predictions", stats.today, 'bi-calendar-check-fill', 'info', stats.weekly ~ ' this week'),
+        ('Avg. Income', '₹{:,.0f}'.format(stats.avg_income), 'bi-currency-rupee', 'warning', 'Average applicant income'),
+        ('Avg. Credit Score', stats.avg_credit, 'bi-speedometer2', 'secondary', 'Average CIBIL score'),
+      ] %}
+      {% for label, val, icon, color, sub in kpis %}
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="kpi-card">
+          <div class="kpi-icon bg-{{ color }}-soft">
+            <i class="bi {{ icon }} text-{{ color }}"></i>
+          </div>
+          <div class="kpi-value counter" data-target="{{ val if val is number else 0 }}">
+            {{ val }}
+          </div>
+          <div class="kpi-label">{{ label }}</div>
+          <div class="kpi-sub text-muted">{{ sub }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ── Charts Row 1 ── -->
+    <div class="row g-4 mb-4">
+      <!-- Daily Trend (Line) -->
+      <div class="col-lg-8">
+        <div class="chart-card-dash h-100">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Prediction Trend (Last 30 Days)</h6>
+            <div class="chart-legend-inline">
+              <span><i class="bi bi-circle-fill text-success"></i> Approved</span>
+              <span><i class="bi bi-circle-fill text-danger"></i> Rejected</span>
+            </div>
+          </div>
+          <div class="chart-dash-body">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- Approval vs Rejection Doughnut -->
+      <div class="col-lg-4">
+        <div class="chart-card-dash h-100">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2 text-info"></i>Overall Split</h6>
+          </div>
+          <div class="chart-dash-body d-flex align-items-center justify-content-center">
+            <canvas id="splitChart" width="220" height="220"></canvas>
+          </div>
+          <div class="chart-split-labels text-center pb-2">
+            <span class="badge-metric bg-success-soft text-success me-2">{{ stats.approval_rate }}% Approved</span>
+            <span class="badge-metric bg-danger-soft text-danger">{{ stats.rejection_rate }}% Rejected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Charts Row 2 ── -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-4">
+        <div class="chart-card-dash h-100">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-bar-chart-fill me-2 text-success"></i>Credit Score Distribution</h6>
+          </div>
+          <div class="chart-dash-body">
+            <canvas id="scoreDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-card-dash h-100">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-briefcase-fill me-2 text-warning"></i>Employment Status</h6>
+          </div>
+          <div class="chart-dash-body d-flex align-items-center justify-content-center">
+            <canvas id="employmentChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-card-dash h-100">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-tag-fill me-2 text-danger"></i>Loan Purpose</h6>
+          </div>
+          <div class="chart-dash-body d-flex align-items-center justify-content-center">
+            <canvas id="purposeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Recent Predictions Table ── -->
+    <div class="row g-4">
+      <div class="col-12">
+        <div class="table-card">
+          <div class="table-card-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-table text-primary"></i>
+              <h6 class="mb-0">Recent Predictions</h6>
+            </div>
+            <a href="{{ url_for('history.index') }}" class="btn btn-sm btn-outline-primary">
+              View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+              <thead>
+                <tr>
+                  <th>#</th><th>Applicant</th><th>Income</th>
+                  <th>Credit Score</th><th>Result</th><th>Probability</th><th>Date</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for pred in recent_predictions %}
+                <tr>
+                  <td><span class="pred-id">#{{ pred.id }}</span></td>
+                  <td>
+                    <div class="applicant-cell">
+                      <div class="applicant-avatar">{{ pred.applicant_name[0]|upper }}</div>
+                      <div>
+                        <div class="fw-600">{{ pred.applicant_name }}</div>
+                        <small class="text-muted">{{ pred.gender or '' }}, {{ pred.age or '' }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>₹{{ '{:,.0f}'.format(pred.annual_income) if pred.annual_income else 'N/A' }}</td>
+                  <td>
+                    <span class="score-pill {% if pred.credit_score and pred.credit_score >= 700 %}score-good{% elif pred.credit_score and pred.credit_score >= 600 %}score-fair{% else %}score-poor{% endif %}">
+                      {{ pred.credit_score or 'N/A' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="result-badge {% if pred.is_approved %}result-approved{% else %}result-rejected{% endif %}">
+                      <i class="bi {% if pred.is_approved %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-1"></i>
+                      {{ pred.result }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="prob-bar-wrap">
+                      <div class="prob-bar">
+                        <div class="prob-fill {% if pred.is_approved %}bg-success{% else %}bg-danger{% endif %}"
+                             style="width: {{ (pred.probability or 0) * 100 }}%"></div>
+                      </div>
+                      <small>{{ '{:.0f}'.format((pred.probability or 0) * 100) }}%</small>
+                    </div>
+                  </td>
+                  <td><small class="text-muted">{{ pred.created_at.strftime('%d %b, %H:%M') if pred.created_at else '' }}</small></td>
+                  <td>
+                    <a href="{{ url_for('predict.result', pred_id=pred.id) }}"
+                       class="btn btn-sm btn-outline-primary btn-table-action">
+                      <i class="bi bi-eye-fill"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                    No predictions yet. <a href="{{ url_for('predict.form') }}">Make your first prediction →</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CHART_DATA = {{ chart_data | tojson }};
+const STATS = {{ stats | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

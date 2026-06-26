@@ -1,0 +1,125 @@
+<nav class="navbar navbar-expand-lg navbar-banking sticky-top" id="mainNavbar">
+  <div class="container-fluid px-4">
+
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+      <div class="brand-icon">
+        <i class="bi bi-credit-card-2-front-fill"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">CreditPredict</span>
+        <span class="brand-sub">AI</span>
+      </div>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarMain" aria-controls="navbarMain"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <i class="bi bi-list fs-4 text-white"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMain">
+
+      <!-- Nav links -->
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+             href="{{ url_for('main.index') }}">
+            <i class="bi bi-house-fill me-1"></i>Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.blueprint == 'predict' %}active{% endif %}"
+             href="{{ url_for('predict.form') }}">
+            <i class="bi bi-lightning-charge-fill me-1"></i>Predict
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}"
+             href="{{ url_for('dashboard.analytics') }}">
+            <i class="bi bi-bar-chart-line-fill me-1"></i>Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.blueprint == 'history' %}active{% endif %}"
+             href="{{ url_for('history.index') }}">
+            <i class="bi bi-clock-history me-1"></i>History
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.blueprint == 'ml_info' %}active{% endif %}"
+             href="{{ url_for('ml_info.index') }}">
+            <i class="bi bi-cpu-fill me-1"></i>ML Models
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
+             href="{{ url_for('main.about') }}">
+            <i class="bi bi-info-circle-fill me-1"></i>About
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
+             href="{{ url_for('main.contact') }}">
+            <i class="bi bi-envelope-fill me-1"></i>Contact
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right controls -->
+      <div class="d-flex align-items-center gap-2 ms-auto">
+
+        <!-- IBM Watson Badge -->
+        <div class="watson-badge d-none d-xl-flex align-items-center gap-1">
+          <i class="bi bi-cloud-fill"></i>
+          <span>IBM Watson</span>
+        </div>
+
+        <!-- GitHub -->
+        <a href="https://github.com/yourusername/credit-card-approval"
+           class="nav-icon-btn" target="_blank" rel="noopener"
+           data-bs-toggle="tooltip" title="View on GitHub">
+          <i class="bi bi-github"></i>
+        </a>
+
+        <!-- Dark Mode Toggle -->
+        <button class="nav-icon-btn" id="darkModeToggle"
+                data-bs-toggle="tooltip" title="Toggle Dark Mode">
+          <i class="bi bi-moon-stars-fill" id="darkModeIcon"></i>
+        </button>
+
+        <!-- Admin -->
+        {% if current_user.is_authenticated %}
+          <div class="dropdown">
+            <button class="nav-icon-btn dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
+              <li><h6 class="dropdown-header">{{ current_user.username }}</h6></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin.panel') }}">
+                <i class="bi bi-shield-check me-2 text-primary"></i>Admin Panel
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('admin.logout') }}">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+              </a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{{ url_for('admin.login') }}" class="nav-icon-btn"
+             data-bs-toggle="tooltip" title="Admin Login">
+            <i class="bi bi-person-circle"></i>
+          </a>
+        {% endif %}
+
+        <!-- Predict CTA -->
+        <a href="{{ url_for('predict.form') }}" class="btn btn-predict ms-2">
+          <i class="bi bi-lightning-charge-fill me-1"></i>
+          <span class="d-none d-md-inline">Predict Now</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

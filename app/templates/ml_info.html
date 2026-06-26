@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}ML Models{% endblock %}
+{% block content %}
+<div class="ml-page">
+  <div class="page-header-section">
+    <div class="container">
+      <nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-custom mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item active">ML Models</li>
+      </ol></nav>
+      <h1 class="page-title"><i class="bi bi-cpu-fill me-2 text-primary"></i>Machine Learning Models</h1>
+      <p class="page-subtitle">Dataset, algorithms, training metrics, and feature analysis</p>
+    </div>
+  </div>
+
+  <div class="container py-5">
+
+    <!-- Dataset Info -->
+    <div class="section-header text-center mb-4">
+      <span class="section-eyebrow">Training Data</span>
+      <h2 class="section-title">Dataset Overview</h2>
+    </div>
+    <div class="row g-3 mb-5">
+      {% for label, val in dataset_info.items() %}
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="dataset-card text-center">
+          <div class="dataset-val">{{ val }}</div>
+          <div class="dataset-label">{{ label.replace('_',' ').title() }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Algorithms -->
+    <div class="section-header text-center mb-4">
+      <span class="section-eyebrow">Algorithms</span>
+      <h2 class="section-title">4 Trained Classifiers</h2>
+    </div>
+    <div class="row g-4 mb-5">
+      {% for algo in algorithms %}
+      <div class="col-md-6">
+        <div class="algo-card h-100">
+          <div class="algo-header">
+            <div class="algo-icon bg-{{ algo.color }}-soft">
+              <i class="bi {{ algo.icon }} text-{{ algo.color }}"></i>
+            </div>
+            <div>
+              <h5 class="fw-700 mb-1">{{ algo.name }}</h5>
+              {% if algo.key == 'xgboost' %}<span class="badge bg-primary">Primary Model</span>{% endif %}
+            </div>
+            {% set m = metrics.get(algo.key, {}) %}
+            {% if m.get('accuracy') %}
+            <div class="algo-accuracy ms-auto">{{ m.accuracy }}%</div>
+            {% endif %}
+          </div>
+          <p class="algo-desc">{{ algo.description }}</p>
+          <div class="row g-2 mb-3">
+            {% if m %}
+            {% for metric_key, metric_label in [('precision','Precision'),('recall','Recall'),('f1_score','F1-Score'),('auc_roc','AUC-ROC')] %}
+            <div class="col-3 text-center">
+              <div class="fw-700 text-primary">{{ m.get(metric_key, '—') }}%</div>
+              <small class="text-muted">{{ metric_label }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <h6 class="small fw-700 text-success mb-1">Pros</h6>
+              <ul class="algo-list algo-pros">
+                {% for p in algo.pros %}<li>{{ p }}</li>{% endfor %}
+              </ul>
+            </div>
+            <div class="col-6">
+              <h6 class="small fw-700 text-danger mb-1">Cons</h6>
+              <ul class="algo-list algo-cons">
+                {% for c in algo.cons %}<li>{{ c }}</li>{% endfor %}
+              </ul>
+            </div>
+          </div>
+          {% if m %}
+          <div class="algo-footer mt-2">
+            <small class="text-muted">Train: {{ m.get('train_time_s','—') }}s &nbsp;·&nbsp; Inference: {{ m.get('pred_time_ms','—') }}ms</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Feature Importance -->
+    {% if feature_importance %}
+    <div class="section-header text-center mb-4">
+      <h2 class="section-title">Feature Importance</h2>
+      <p class="section-subtitle">Top features driving credit approval decisions (Random Forest)</p>
+    </div>
+    <div class="chart-card-dash mb-5">
+      <div class="chart-dash-body" style="height: 360px;">
+        <canvas id="featureChart"></canvas>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const FEATURE_IMPORTANCE = {{ feature_importance | tojson }};
+document.addEventListener('DOMContentLoaded', function() {
+  if (Object.keys(FEATURE_IMPORTANCE).length && document.getElementById('featureChart')) {
+    const labels = Object.keys(FEATURE_IMPORTANCE).map(k => k.replace(/_/g,' '));
+    const vals = Object.values(FEATURE_IMPORTANCE).map(v => (v*100).toFixed(2));
+    new Chart(document.getElementById('featureChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: 'Importance (%)', data: vals,
+          backgroundColor: labels.map((_,i)=>`hsla(${210-i*12},70%,45%,0.85)`), borderRadius: 6 }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, title: { display: true, text: 'Importance (%)' } } }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

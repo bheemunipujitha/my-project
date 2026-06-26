@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <div class="page-header-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col">
+          <h1 class="page-title"><i class="bi bi-shield-check-fill me-2 text-warning"></i>Admin Dashboard</h1>
+          <p class="page-subtitle">System overview · Model performance · Retraining controls</p>
+        </div>
+        <div class="col-auto d-flex gap-2">
+          <form method="POST" action="{{ url_for('admin.retrain') }}"
+                onsubmit="return confirm('Retrain all ML models? This may take 30–60 seconds.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-warning btn-sm">
+              <i class="bi bi-arrow-repeat me-1"></i>Retrain Models
+            </button>
+          </form>
+          <a href="{{ url_for('admin.logout') }}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-arrow-right me-1"></i>Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid px-4 py-4">
+
+    <!-- KPI Summary -->
+    <div class="row g-3 mb-4">
+      {% for label, val, icon, color in [
+        ('Total Predictions', total, 'bi-collection-fill', 'primary'),
+        ('Approved', approved, 'bi-check-circle-fill', 'success'),
+        ('Rejected', rejected, 'bi-x-circle-fill', 'danger'),
+        ("Today", today_count, 'bi-calendar-check-fill', 'info'),
+      ] %}
+      <div class="col-6 col-md-3">
+        <div class="kpi-card">
+          <div class="kpi-icon bg-{{ color }}-soft"><i class="bi {{ icon }} text-{{ color }}"></i></div>
+          <div class="kpi-value">{{ val }}</div>
+          <div class="kpi-label">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Model Performance Table -->
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="table-card">
+          <div class="table-card-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-table text-primary"></i>
+              <h6 class="mb-0">Model Performance Comparison</h6>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Accuracy</th><th>Precision</th><th>Recall</th>
+                  <th>F1-Score</th><th>AUC-ROC</th>
+                  <th>Train Time</th><th>Pred Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set model_names = {'xgboost':'XGBoost','random_forest':'Random Forest','logistic_regression':'Logistic Regression','decision_tree':'Decision Tree'} %}
+                {% for key, display in model_names.items() %}
+                {% set m = metrics.get(key, {}) %}
+                <tr>
+                  <td>
+                    <span class="fw-600">{{ display }}</span>
+                    {% if key == 'xgboost' %}<span class="badge bg-primary ms-1">Primary</span>{% endif %}
+                  </td>
+                  <td><span class="accuracy-pill">{{ m.get('accuracy','—') }}%</span></td>
+                  <td>{{ m.get('precision','—') }}%</td>
+                  <td>{{ m.get('recall','—') }}%</td>
+                  <td>{{ m.get('f1_score','—') }}%</td>
+                  <td>{{ m.get('auc_roc','—') }}%</td>
+                  <td>{{ m.get('train_time_s','—') }}s</td>
+                  <td>{{ m.get('pred_time_ms','—') }}ms</td>
+                </tr>
+                {% endfor %}
+                {% if not metrics %}
+                <tr>
+                  <td colspan="8" class="text-center text-muted py-4">
+                    No model metrics found. Click "Retrain Models" to train and generate metrics.
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Importance + Accuracy Chart -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="chart-card-dash">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Feature Importance (Random Forest)</h6>
+          </div>
+          <div class="chart-dash-body">
+            <canvas id="featureImportanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-card-dash">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Model Accuracy Comparison</h6>
+          </div>
+          <div class="chart-dash-body">
+            <canvas id="accuracyCompareChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confusion Matrices -->
+    {% if metrics %}
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="chart-card-dash">
+          <div class="chart-dash-header">
+            <h6 class="mb-0"><i class="bi bi-grid-3x3-gap-fill me-2 text-info"></i>Confusion Matrices</h6>
+          </div>
+          <div class="row g-3 p-3">
+            {% for key, display in model_names.items() %}
+            {% set m = metrics.get(key, {}) %}
+            {% if m.get('confusion_matrix') %}
+            <div class="col-md-3">
+              <div class="confusion-matrix-card text-center">
+                <h6 class="mb-3">{{ display }}</h6>
+                {% set cm = m['confusion_matrix'] %}
+                <div class="cm-grid">
+                  <div class="cm-cell cm-tn">TN<br><strong>{{ cm[0][0] }}</strong></div>
+                  <div class="cm-cell cm-fp">FP<br><strong>{{ cm[0][1] }}</strong></div>
+                  <div class="cm-cell cm-fn">FN<br><strong>{{ cm[1][0] }}</strong></div>
+                  <div class="cm-cell cm-tp">TP<br><strong>{{ cm[1][1] }}</strong></div>
+                </div>
+                <div class="cm-legend mt-2">
+                  <small class="text-success">TN/TP = Correct</small> &nbsp;
+                  <small class="text-danger">FP/FN = Error</small>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Predictions -->
+    <div class="row g-4">
+      <div class="col-12">
+        <div class="table-card">
+          <div class="table-card-header">
+            <h6 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Predictions</h6>
+            <a href="{{ url_for('history.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+              <thead>
+                <tr><th>#</th><th>Applicant</th><th>Result</th><th>Probability</th><th>Model</th><th>Date</th></tr>
+              </thead>
+              <tbody>
+                {% for p in recent %}
+                <tr>
+                  <td>#{{ p.id }}</td>
+                  <td>{{ p.applicant_name }}</td>
+                  <td><span class="result-badge {% if p.is_approved %}result-approved{% else %}result-rejected{% endif %}">{{ p.result }}</span></td>
+                  <td>{{ '{:.0f}'.format((p.probability or 0)*100) }}%</td>
+                  <td><small>{{ p.model_used or 'N/A' }}</small></td>
+                  <td><small>{{ p.created_at.strftime('%d %b %Y %H:%M') if p.created_at else '' }}</small></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-3">No predictions yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const FEATURE_IMPORTANCE = {{ feature_importance | tojson }};
+const METRICS = {{ metrics | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+// Admin-specific: feature importance + accuracy comparison charts
+document.addEventListener('DOMContentLoaded', function() {
+  if (Object.keys(FEATURE_IMPORTANCE).length && document.getElementById('featureImportanceChart')) {
+    const labels = Object.keys(FEATURE_IMPORTANCE).slice(0, 10).map(k => k.replace(/_/g,' '));
+    const values = Object.values(FEATURE_IMPORTANCE).slice(0, 10).map(v => (v * 100).toFixed(1));
+    new Chart(document.getElementById('featureImportanceChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: 'Importance (%)', data: values,
+          backgroundColor: 'rgba(15,76,129,0.8)', borderRadius: 6 }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } } }
+    });
+  }
+  if (Object.keys(METRICS).length && document.getElementById('accuracyCompareChart')) {
+    const modelLabels = Object.keys(METRICS).map(k => k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()));
+    const accVals = Object.values(METRICS).map(m => m.accuracy || 0);
+    new Chart(document.getElementById('accuracyCompareChart'), {
+      type: 'bar',
+      data: {
+        labels: modelLabels,
+        datasets: [{ label: 'Accuracy (%)', data: accVals,
+          backgroundColor: ['rgba(15,76,129,0.85)','rgba(46,125,50,0.85)',
+                            'rgba(21,101,192,0.85)','rgba(211,47,47,0.85)'],
+          borderRadius: 8 }]
+      },
+      options: { plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+  }
+});
+</script>
+{% endblock %}

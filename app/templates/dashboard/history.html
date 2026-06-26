@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Prediction History{% endblock %}
+
+{% block content %}
+<div class="history-page">
+  <div class="page-header-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col">
+          <nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-custom mb-2">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">History</li>
+          </ol></nav>
+          <h1 class="page-title"><i class="bi bi-clock-history me-2 text-primary"></i>Prediction History</h1>
+          <p class="page-subtitle">Full log of all credit approval predictions made through the system.</p>
+        </div>
+        <div class="col-auto d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('history.export_csv', search=search, result=result_filter) }}"
+             class="btn btn-sm btn-success">
+            <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i>Export CSV
+          </a>
+          <form method="POST" action="{{ url_for('history.delete_all') }}"
+                onsubmit="return confirm('Delete ALL prediction records? This cannot be undone.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash3-fill me-1"></i>Clear All
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <!-- Search & Filter Bar -->
+    <div class="filter-bar mb-4">
+      <form method="GET" action="{{ url_for('history.index') }}" class="row g-2 align-items-end">
+        <div class="col-md-5">
+          <div class="input-group-custom search-group">
+            <span class="input-prefix"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control-custom" name="search"
+                   value="{{ search }}" placeholder="Search by name, email, or occupation…">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="input-group-custom">
+            <span class="input-prefix"><i class="bi bi-funnel-fill"></i></span>
+            <select class="form-control-custom form-select-custom" name="result">
+              <option value="">All Results</option>
+              <option value="Approved" {% if result_filter == 'Approved' %}selected{% endif %}>Approved Only</option>
+              <option value="Rejected" {% if result_filter == 'Rejected' %}selected{% endif %}>Rejected Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search me-1"></i>Filter
+          </button>
+        </div>
+        <div class="col-md-2">
+          <a href="{{ url_for('history.index') }}" class="btn btn-outline-secondary w-100">
+            <i class="bi bi-x-circle me-1"></i>Clear
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <p class="text-muted mb-0">
+        Showing <strong>{{ pagination.items | length }}</strong> of
+        <strong>{{ pagination.total }}</strong> predictions
+        {% if search %} for "<strong>{{ search }}</strong>"{% endif %}
+        {% if result_filter %} · <strong>{{ result_filter }}</strong> only{% endif %}
+      </p>
+      <div class="d-flex gap-2">
+        <span class="badge bg-success-soft text-success">
+          <i class="bi bi-check-circle-fill me-1"></i>{{ approved_count }} Approved
+        </span>
+        <span class="badge bg-danger-soft text-danger">
+          <i class="bi bi-x-circle-fill me-1"></i>{{ rejected_count }} Rejected
+        </span>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="table table-dashboard mb-0" id="historyTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date &amp; Time</th>
+              <th>Applicant</th>
+              <th>Income</th>
+              <th>Credit Score</th>
+              <th>Loan Amount</th>
+              <th>Result</th>
+              <th>Probability</th>
+              <th>Model</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pred in predictions %}
+            <tr class="history-row">
+              <td><span class="pred-id">#{{ pred.id }}</span></td>
+              <td>
+                <div class="fw-500">{{ pred.created_at.strftime('%d %b %Y') if pred.created_at else '' }}</div>
+                <small class="text-muted">{{ pred.created_at.strftime('%H:%M') if pred.created_at else '' }}</small>
+              </td>
+              <td>
+                <div class="applicant-cell">
+                  <div class="applicant-avatar">{{ pred.applicant_name[0]|upper if pred.applicant_name else '?' }}</div>
+                  <div>
+                    <div class="fw-600">{{ pred.applicant_name }}</div>
+                    <small class="text-muted">{{ pred.gender or '' }}{{ ', ' ~ pred.age ~ 'y' if pred.age else '' }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>{{ '₹{:,.0f}'.format(pred.annual_income) if pred.annual_income else '—' }}</td>
+              <td>
+                <span class="score-pill {% if pred.credit_score and pred.credit_score >= 700 %}score-good{% elif pred.credit_score and pred.credit_score >= 600 %}score-fair{% else %}score-poor{% endif %}">
+                  {{ pred.credit_score or '—' }}
+                </span>
+              </td>
+              <td>{{ '₹{:,.0f}'.format(pred.loan_amount) if pred.loan_amount else '—' }}</td>
+              <td>
+                <span class="result-badge {% if pred.is_approved %}result-approved{% else %}result-rejected{% endif %}">
+                  <i class="bi {% if pred.is_approved %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-1"></i>
+                  {{ pred.result }}
+                </span>
+              </td>
+              <td>
+                <div class="prob-bar-wrap">
+                  <div class="prob-bar">
+                    <div class="prob-fill {% if pred.is_approved %}bg-success{% else %}bg-danger{% endif %}"
+                         style="width: {{ (pred.probability or 0) * 100 }}%"></div>
+                  </div>
+                  <small>{{ '{:.0f}'.format((pred.probability or 0) * 100) }}%</small>
+                </div>
+              </td>
+              <td><small class="text-muted">{{ pred.model_used or 'N/A' }}</small></td>
+              <td>
+                <div class="action-btns d-flex gap-1">
+                  <a href="{{ url_for('predict.result', pred_id=pred.id) }}"
+                     class="btn btn-xs btn-outline-primary"
+                     data-bs-toggle="tooltip" title="View Result">
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                  <a href="{{ url_for('predict.download_pdf', pred_id=pred.id) }}"
+                     class="btn btn-xs btn-outline-danger"
+                     data-bs-toggle="tooltip" title="Download PDF">
+                    <i class="bi bi-file-pdf-fill"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('history.delete', pred_id=pred.id) }}"
+                        onsubmit="return confirm('Delete prediction #{{ pred.id }}?')" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-xs btn-outline-danger"
+                            data-bs-toggle="tooltip" title="Delete">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="10" class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                {% if search or result_filter %}
+                  No predictions match your filters.
+                  <a href="{{ url_for('history.index') }}">Clear filters</a>
+                {% else %}
+                  No predictions yet. <a href="{{ url_for('predict.form') }}">Make your first prediction →</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="History pagination" class="mt-4">
+      <ul class="pagination pagination-banking justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('history.index', page=pagination.prev_num, search=search, result=result_filter) }}">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+        </li>
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('history.index', page=p, search=search, result=result_filter) }}">{{ p }}</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for('history.index', page=pagination.next_num, search=search, result=result_filter) }}">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inline approved/rejected counts for the badge display
+const approved_count = {{ approved_count if approved_count is defined else 0 }};
+const rejected_count = {{ rejected_count if rejected_count is defined else 0 }};
+</script>
+{% endblock %}
